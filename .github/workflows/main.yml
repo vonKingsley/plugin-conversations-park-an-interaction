@@ -51,7 +51,7 @@ jobs:
       - name: Deploy plugin to ${{ github.event.inputs.environment }}
         uses: finnp/create-file-action@1.0.0
         env:
-          FILE_NAME: "./twilio/flex/plugins/plugin-park-an-interaction/public/appConfig.js"
+          FILE_NAME: "/home/runner/work/plugin-conversations-park-an-interaction/plugin-conversations-park-an-interaction/public/appConfig.js"
           FILE_DATA: "const accountSid = '1234455'"
       - run: npm ci
       - run: npm run predeploy
