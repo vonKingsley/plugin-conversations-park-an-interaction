@@ -1,0 +1,77 @@
+# This workflow will do a deploy for the Twilio Flex Plugins based on entered information
+
+name: Deploy TEST Flex Plugins
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: 'Enter plugin name'
+        required: true
+        default: ''
+      version:
+        description: 'Enter version to deploy'
+        required: false
+        default: ''
+      environment:
+        description: 'Enter environment to deploy'
+        required: true
+        default: ''
+      email:
+        description: 'Enter your email'
+        required: true
+        default: ''
+jobs:
+
+  plugin-transfer-to-survey:
+    if: ${{ github.event.inputs.plugin == 'plugin-park-an-interaction' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: twilio/flex/plugins/plugin-park-an-interaction
+    strategy:
+      matrix:
+        node-version: [ 16.x ]
+    steps:
+      - name: Checkout by version
+        uses: actions/checkout@v3
+        with:
+          ref: 'plugin-park-an-interaction/${{ github.event.inputs.version }}'
+        if: ${{ github.event.inputs.version != '' }}
+
+      - name: Checkout by latest
+        uses: actions/checkout@v3
+        if: ${{ github.event.inputs.version == '' }}
+
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Deploy plugin to ${{ github.event.inputs.environment }}
+        uses: finnp/create-file-action@1.0.0
+        env:
+          FILE_NAME: "plugin-park-an-interaction/public/appConfig.example.js"
+          FILE_DATA: "const accountSid = ''"
+      - run: npm ci
+      - run: npm run predeploy
+      - run: npm run deploy -- --changelog "Development build"
+        if: ${{ github.event.inputs.environment == 'development' }}
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.DEV_TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.DEV_TWILIO_AUTH_TOKEN }}
+      - run: npm run deploy -- --changelog "Staging (pre-prod) build"
+        if: ${{ github.event.inputs.environment == 'staging' }}
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.STAGING_TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.STAGING_TWILIO_AUTH_TOKEN }}
+      - run: npm run deploy -- --changelog "Production build"
+        if: ${{ github.event.inputs.environment == 'production' && github.event.inputs.version != '' }}
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.PROD_TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.PROD_TWILIO_AUTH_TOKEN }}
+      - run: npm run deploy -- --changelog "Training build"
+        if: ${{ github.event.inputs.environment == 'training' && github.event.inputs.version != '' }}
+        env:
+          TWILIO_ACCOUNT_SID: ${{ secrets.TRAINING_TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TRAINING_TWILIO_AUTH_TOKEN }}
