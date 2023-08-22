@@ -53,6 +53,7 @@ jobs:
         env:
           FILE_NAME: "plugin-park-an-interaction/public/appConfig.js"
           FILE_DATA: "const accountSid = '1234455'"
+      - run: npm install twilio-cli -g
       - run: npm ci
       - run: npm run predeploy
       - run: npm run deploy -- --changelog "Development build"
