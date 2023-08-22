@@ -36,7 +36,7 @@ jobs:
       - name: Checkout by version
         uses: actions/checkout@v3
         with:
-          ref: 'plugin-park-an-interaction/${{ github.event.inputs.version }}'
+          ref: ${{ github.event.pull_request.head.sha }}'
         if: ${{ github.event.inputs.version != '' }}
 
       - name: Checkout by latest
