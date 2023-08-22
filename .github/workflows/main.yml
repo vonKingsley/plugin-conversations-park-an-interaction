@@ -23,7 +23,7 @@ on:
         default: ''
 jobs:
 
-  plugin-transfer-to-survey:
+  plugin-park-an-interaction:
     if: ${{ github.event.inputs.plugin == 'plugin-park-an-interaction' }}
     runs-on: ubuntu-latest
     defaults:
